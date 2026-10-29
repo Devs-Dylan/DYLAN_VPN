@@ -1,1 +1,40 @@
+name: Build DYLAN VPN
 
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dezipper
+        run: unzip -q M-3.D-VPN.zip
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Noyau Xray
+        working-directory: M-3.D-VPN
+        run: |
+          mkdir -p app/libs
+          curl -L -o app/libs/libv2ray.aar https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar
+
+      - name: Compiler
+        working-directory: M-3.D-VPN
+        run: gradle :app:assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dylan-vpn-debug
+          path: M-3.D-VPN/app/build/outputs/apk/debug/*.apk
